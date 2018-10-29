@@ -5,21 +5,20 @@ const _ = require('lodash')
 const { lstatSync, readdirSync } = require('fs')
 const { join } = require('path')
 
-isRelevantFolder = (i) => !i.match(/^\.|node_modules/);
-const isDirectory = source => lstatSync(source).isDirectory()
-const getDirectories = source =>
-  readdirSync(source).map(name => join(source, name)).filter(isDirectory)
+isRelevantFolder = (i) => !i.name.match(/^\.|node_modules/) && i.type === 'directory';
 
-const foldersList = getDirectories('./').filter(isRelevantFolder);
+const foldersList = dirTree(path.join(__dirname, '../'), {extensions:/\.md/}).children.filter(isRelevantFolder)
 
-const nav =  foldersList.map(name => {
+
+const nav =  foldersList.map(folder => {
   return {
-    text: _.startCase(name),
-    link: `/${name}/`
+    text: _.startCase(folder.name),
+    link: `/${folder.name}/`
   }
 })
 
 const sidebar = {}
+
 
 nav.forEach((i) => {
   let mdFiles = dirTree(path.join(__dirname, `..${i.link}`), {extensions:/\.md/})
@@ -31,7 +30,9 @@ nav.forEach((i) => {
 
 module.exports = {
   title: 'Frontend Craft Docs',
+  base: '/vuepress-test/',
   themeConfig: {
+    home: true,
     nav,
     sidebar,
   }
